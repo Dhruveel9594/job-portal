@@ -1,0 +1,36 @@
+services:
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: talenthub-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - JWT_SECRET=your-secret-key-change-in-production
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - talenthub-network
+    restart: unless-stopped
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: talenthub-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - talenthub-network
+    restart: unless-stopped
+
+networks:
+  talenthub-network:
+    driver: bridge

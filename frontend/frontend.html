@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job-portal - Modern Job Portal</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #FF3366;
+      --primary-dark: #E62958;
+      --primary-light: #FF5580;
+      --secondary: #6366F1;
+      --dark: #0F172A;
+      --dark-light: #1E293B;
+      --dark-lighter: #334155;
+      --text: #F1F5F9;
+      --text-muted: #94A3B8;
+      --border: #334155;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --gradient-primary: linear-gradient(135deg, #FF3366 0%, #FF6B9D 100%);
+      --gradient-secondary: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+      --gradient-dark: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Background Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -50%;
+      left: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 51, 102, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse 10s ease-in-out infinite reverse;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.1); }
+    }
+
+    #root {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    /* Animations */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Navigation */
+    .navbar {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .navbar-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+    }
+
+    .nav-link.active {
+      color: var(--primary);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.75rem 1.75rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 20px rgba(255, 51, 102, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 51, 102, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--gradient-secondary);
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      background: rgba(255, 51, 102, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border-color: var(--primary-light);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--dark-light);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Job Card */
+    .job-card {
+      animation: scaleIn 0.5s ease-out;
+      animation-fill-mode: backwards;
+    }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1.5rem;
+    }
+
+    .job-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .job-company {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .job-badge {
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--secondary);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .job-description {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .job-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .skill-tag {
+      padding: 0.4rem 0.9rem;
+      background: rgba(255, 51, 102, 0.1);
+      border: 1px solid rgba(255, 51, 102, 0.3);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--primary-light);
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .skill-tag:hover {
+      background: rgba(255, 51, 102, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .job-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(255, 51, 102, 0.1);
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      background: var(--dark);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--text) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: slideUp 0.8s ease-out;
+    }
+
+    .hero-subtitle {
+      font-size: 1.4rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+      animation: slideUp 0.8s ease-out 0.2s;
+      animation-fill-mode: backwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      animation: slideUp 0.8s ease-out 0.4s;
+      animation-fill-mode: backwards;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: var(--gradient-dark);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-value {
+      font-size: 3rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Grid */
+    .jobs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal {
+      background: var(--dark-light);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2.5rem;
+      animation: scaleIn 0.3s ease;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .modal-title {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+      border-radius: 8px;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+
+    /* Alert */
+    .alert {
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slideUp 0.4s ease;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6EE7B7;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+    }
+
+    .alert-info {
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #A5B4FC;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 4rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      border: 4px solid var(--border);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+      font-size: 1rem;
+      font-family: 'Syne', sans-serif;
+    }
+
+    .tab:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .empty-text {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .jobs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* User Info */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Application Table */
+    .applications-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .applications-table th,
+    .applications-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .applications-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .applications-table tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .status-badge {
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-pending {
+      background: rgba(251, 191, 36, 0.2);
+      color: #FDE047;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .status-approved {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6EE7B7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.2);
+      color: #FCA5A5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // API Configuration
+    const API_URL = 'http://localhost:4000/api';
+
+    // Auth Context
+    function App() {
+      const [user, setUser] = useState(null);
+      const [token, setToken] = useState(localStorage.getItem('token'));
+
+      useEffect(() => {
+        if (token) {
+          fetchUser();
+        }
+      }, [token]);
+
+      const fetchUser = async () => {
+        try {
+          const response = await fetch(`${API_URL}/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUser(data);
+          } else {
+            logout();
+          }
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      };
+
+      const login = (newToken, userData) => {
+        localStorage.setItem('token', newToken);
+        setToken(newToken);
+        setUser(userData);
+      };
+
+      const logout = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+      };
+
+      return (
+        <div>
+          <Navbar user={user} logout={logout} />
+          {!user ? (
+            <AuthPage onLogin={login} />
+          ) : user.role === 'candidate' ? (
+            <CandidateDashboard user={user} token={token} />
+          ) : (
+            <RecruiterDashboard user={user} token={token} />
+          )}
+        </div>
+      );
+    }
+
+    // Navbar Component
+    function Navbar({ user, logout }) {
+      return (
+        <nav className="navbar">
+          <div className="navbar-content">
+            <div className="logo">Job-portal</div>
+            {user && (
+              <div className="nav-links">
+                <div className="user-info">
+                  <div className="user-avatar">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{user.name}</div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                      {user.role === 'candidate' ? 'Job Seeker' : 'Recruiter'}
+                    </div>
+                  </div>
+                </div>
+                <button onClick={logout} className="btn btn-ghost">
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </nav>
+      );
+    }
+
+    // Auth Page
+    function AuthPage({ onLogin }) {
+      const [isLogin, setIsLogin] = useState(true);
+      const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        name: '',
+        role: 'candidate'
+      });
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        const endpoint = isLogin ? '/login' : '/register';
+        const body = isLogin 
+          ? { email: formData.email, password: formData.password }
+          : formData;
+
+        try {
+          const response = await fetch(`${API_URL}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            onLogin(data.token, data.user);
+          } else {
+            setError(data.error || 'Authentication failed');
+          }
+        } catch (error) {
+          setError('Network error. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div>
+          <div className="hero">
+            <h1 className="hero-title">Find Your Dream Job</h1>
+            <p className="hero-subtitle">
+              Connect with top employers and discover opportunities that match your skills
+            </p>
+          </div>
+
+          <div className="container">
+            <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+              <div className="card" style={{ animation: 'scaleIn 0.6s ease-out' }}>
+                <h2 style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                  {isLogin ? 'Welcome Back' : 'Create Account'}
+                </h2>
+
+                {error && (
+                  <div className="alert alert-error">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                  {!isLogin && (
+                    <div className="form-group">
+                      <label className="form-label">Full Name</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required={!isLogin}
+                      />
+                    </div>
+                  )}
+
+                  <div className="form-group">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Password</label>
+                    <input
+                      type="password"
+                      className="form-input"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  {!isLogin && (
+                    <div className="form-group">
+                      <label className="form-label">I am a</label>
+                      <select
+                        className="form-select"
+                        value={formData.role}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                      >
+                        <option value="candidate">Job Seeker</option>
+                        <option value="recruiter">Recruiter</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary" 
+                    style={{ width: '100%', marginTop: '1rem' }}
+                    disabled={loading}
+                  >
+                    {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+                  </button>
+                </form>
+
+                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+                  <button
+                    onClick={() => setIsLogin(!isLogin)}
+                    className="btn btn-ghost"
+                    style={{ background: 'transparent', border: 'none', textDecoration: 'underline' }}
+                  >
+                    {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                  </button>
+                </div>
+
+                {isLogin && (
+                  <div style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '12px', fontSize: '0.9rem' }}>
+                    <strong>Demo Credentials:</strong>
+                    <div style={{ marginTop: '0.5rem', color: 'var(--text-muted)' }}>
+                      Candidate: alice@example.com / password123<br />
+                      Recruiter: recruiter@techcorp.com / password123
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Candidate Dashboard
+    function CandidateDashboard({ user, token }) {
+      const [jobs, setJobs] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [selectedJob, setSelectedJob] = useState(null);
+      const [applying, setApplying] = useState(false);
+      const [message, setMessage] = useState(null);
+
+      useEffect(() => {
+        fetchJobs();
+      }, []);
+
+      const fetchJobs = async () => {
+        try {
+          const response = await fetch(`${API_URL}/jobs`);
+          const data = await response.json();
+          setJobs(data);
+        } catch (error) {
+          console.error('Error fetching jobs:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const applyForJob = async (jobId) => {
+        setApplying(true);
+        try {
+          const response = await fetch(`${API_URL}/apply`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ jobId })
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            setMessage({ type: 'success', text: 'Application submitted successfully!' });
+            setSelectedJob(null);
+          } else {
+            setMessage({ type: 'error', text: data.error || 'Failed to apply' });
+          }
+        } catch (error) {
+          setMessage({ type: 'error', text: 'Network error. Please try again.' });
+        } finally {
+          setApplying(false);
+          setTimeout(() => setMessage(null), 5000);
+        }
+      };
+
+      if (loading) {
+        return (
+          <div className="loading">
+            <div className="spinner"></div>
+            <div>Loading opportunities...</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="container">
+          <div style={{ marginBottom: '3rem' }}>
+            <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
+              Hi {user.name.split(' ')[0]} 👋
+            </h1>
+            <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>
+              Discover {jobs.length} amazing opportunities waiting for you
+            </p>
+          </div>
+
+          {message && (
+            <div className={`alert alert-${message.type}`}>
+              {message.text}
+            </div>
+          )}
+
+          <div className="jobs-grid">
+            {jobs.map((job, index) => (
+              <div 
+                key={job.id} 
+                className="card job-card"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="job-header">
+                  <div>
+                    <h3 className="job-title">{job.title}</h3>
+                    <div className="job-company">{job.recruiterName}</div>
+                  </div>
+                  <div className="job-badge">Open</div>
+                </div>
+
+                <p className="job-description">{job.description}</p>
+
+                <div className="job-skills">
+                  {job.skills.split(',').map((skill, i) => (
+                    <span key={i} className="skill-tag">
+                      {skill.trim()}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="job-footer">
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                    Posted recently
+                  </div>
+                  <button
+                    onClick={() => setSelectedJob(job)}
+                    className="btn btn-primary"
+                  >
+                    Apply Now
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {jobs.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-icon">💼</div>
+              <h2 className="empty-title">No jobs available</h2>
+              <p className="empty-text">Check back soon for new opportunities</p>
+            </div>
+          )}
+
+          {selectedJob && (
+            <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2 className="modal-title">Apply for {selectedJob.title}</h2>
+                  <button className="close-btn" onClick={() => setSelectedJob(null)}>
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{ marginBottom: '2rem' }}>
+                  <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                    {selectedJob.description}
+                  </p>
+                  <div className="job-skills">
+                    {selectedJob.skills.split(',').map((skill, i) => (
+                      <span key={i} className="skill-tag">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="alert alert-info">
+                  Your application will be sent to {selectedJob.recruiterName}
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button
+                    onClick={() => applyForJob(selectedJob.id)}
+                    className="btn btn-primary"
+                    style={{ flex: 1 }}
+                    disabled={applying}
+                  >
+                    {applying ? 'Submitting...' : 'Submit Application'}
+                  </button>
+                  <button
+                    onClick={() => setSelectedJob(null)}
+                    className="btn btn-outline"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Recruiter Dashboard
+    function RecruiterDashboard({ user, token }) {
+      const [activeTab, setActiveTab] = useState('jobs');
+      const [jobs, setJobs] = useState([]);
+      const [applications, setApplications] = useState([]);
+      const [stats, setStats] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [showJobModal, setShowJobModal] = useState(false);
+      const [message, setMessage] = useState(null);
+      const [newJob, setNewJob] = useState({
+        title: '',
+        description: '',
+        skills: ''
+      });
+
+      useEffect(() => {
+        fetchData();
+      }, []);
+
+      const fetchData = async () => {
+        try {
+          const [jobsRes, appsRes, statsRes] = await Promise.all([
+            fetch(`${API_URL}/jobs`),
+            fetch(`${API_URL}/applications`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            }),
+            fetch(`${API_URL}/job-stats`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            })
+          ]);
+
+          const jobsData = await jobsRes.json();
+          const appsData = await appsRes.json();
+          const statsData = await statsRes.json();
+
+          setJobs(jobsData.filter(j => j.recruiterId === user.id));
+          setApplications(appsData);
+          setStats(statsData);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const createJob = async (e) => {
+        e.preventDefault();
+        try {
+          const response = await fetch(`${API_URL}/jobs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(newJob)
+          });
+
+          if (response.ok) {
+            setMessage({ type: 'success', text: 'Job posted successfully!' });
+            setShowJobModal(false);
+            setNewJob({ title: '', description: '', skills: '' });
+            fetchData();
+          } else {
+            setMessage({ type: 'error', text: 'Failed to create job' });
+          }
+        } catch (error) {
+          setMessage({ type: 'error', text: 'Network error' });
+        }
+        setTimeout(() => setMessage(null), 5000);
+      };
+
+      if (loading) {
+        return (
+          <div className="loading">
+            <div className="spinner"></div>
+            <div>Loading dashboard...</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+            <div>
+              <h1 style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>
+                Recruiter Dashboard
+              </h1>
+              <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>
+                Manage your job postings and applications
+              </p>
+            </div>
+            <button onClick={() => setShowJobModal(true)} className="btn btn-primary">
+              + Post New Job
+            </button>
+          </div>
+
+          {message && (
+            <div className={`alert alert-${message.type}`}>
+              {message.text}
+            </div>
+          )}
+
+          {stats && (
+            <div className="stats">
+              <div className="stat-card">
+                <div className="stat-value">{stats.totalJobs}</div>
+                <div className="stat-label">Active Jobs</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{stats.totalApplications}</div>
+                <div className="stat-label">Total Applications</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{stats.totalCandidates}</div>
+                <div className="stat-label">Unique Candidates</div>
+              </div>
+            </div>
+          )}
+
+          <div className="tabs">
+            <button
+              className={`tab ${activeTab === 'jobs' ? 'active' : ''}`}
+              onClick={() => setActiveTab('jobs')}
+            >
+              My Jobs
+            </button>
+            <button
+              className={`tab ${activeTab === 'applications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('applications')}
+            >
+              Applications ({applications.length})
+            </button>
+          </div>
+
+          {activeTab === 'jobs' && (
+            <div className="jobs-grid">
+              {jobs.map((job, index) => (
+                <div 
+                  key={job.id} 
+                  className="card job-card"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="job-header">
+                    <div>
+                      <h3 className="job-title">{job.title}</h3>
+                      <div className="job-company">Posted by you</div>
+                    </div>
+                    <div className="job-badge">Active</div>
+                  </div>
+
+                  <p className="job-description">{job.description}</p>
+
+                  <div className="job-skills">
+                    {job.skills.split(',').map((skill, i) => (
+                      <span key={i} className="skill-tag">
+                        {skill.trim()}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="job-footer">
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                      {applications.filter(a => a.jobId === job.id).length} applications
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {jobs.length === 0 && (
+                <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+                  <div className="empty-icon">📋</div>
+                  <h2 className="empty-title">No jobs posted yet</h2>
+                  <p className="empty-text">Create your first job posting to start receiving applications</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'applications' && (
+            <div className="card">
+              {applications.length > 0 ? (
+                <table className="applications-table">
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Job Title</th>
+                      <th>Applied Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applications.map((app) => (
+                      <tr key={app.id}>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{app.candidateName}</div>
+                          <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                            {app.candidateEmail}
+                          </div>
+                        </td>
+                        <td>{app.jobTitle}</td>
+                        <td style={{ color: 'var(--text-muted)' }}>
+                          {new Date(app.appliedAt).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <span className={`status-badge status-${app.status}`}>
+                            {app.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="empty-state">
+                  <div className="empty-icon">📭</div>
+                  <h2 className="empty-title">No applications yet</h2>
+                  <p className="empty-text">Applications will appear here when candidates apply</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {showJobModal && (
+            <div className="modal-overlay" onClick={() => setShowJobModal(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2 className="modal-title">Post New Job</h2>
+                  <button className="close-btn" onClick={() => setShowJobModal(false)}>
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={createJob}>
+                  <div className="form-group">
+                    <label className="form-label">Job Title</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={newJob.title}
+                      onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
+                      required
+                      placeholder="e.g. Senior React Developer"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Description</label>
+                    <textarea
+                      className="form-input"
+                      value={newJob.description}
+                      onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
+                      required
+                      placeholder="Describe the role and responsibilities..."
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Required Skills (comma-separated)</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={newJob.skills}
+                      onChange={(e) => setNewJob({ ...newJob, skills: e.target.value })}
+                      required
+                      placeholder="React, JavaScript, TypeScript, CSS"
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                      Post Job
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowJobModal(false)}
+                      className="btn btn-outline"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Render App
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
