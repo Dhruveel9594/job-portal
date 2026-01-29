@@ -1,0 +1,6 @@
+# Ensure Dockerfiles are treated as text
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+
+# Ensure shell scripts use LF
+*.sh text eol=lf
