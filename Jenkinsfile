@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-        DOCKER_BUILDKIT = "1"
-        COMPOSE_DOCKER_CLI_BUILD = "1"
+        DOCKER_BUILDKIT = "0"  // Disable BuildKit
+        COMPOSE_DOCKER_CLI_BUILD = "0"
     }
 
     tools {
@@ -36,6 +36,7 @@ pipeline {
                 script {
                     sh '''
                         docker compose down || true
+                        docker system prune -f
                         docker compose up -d --build --remove-orphans
                     '''
                 }
