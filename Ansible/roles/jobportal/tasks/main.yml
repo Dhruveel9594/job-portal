@@ -1,0 +1,26 @@
+---
+- name: Install Node.js on macOS
+  homebrew:
+    name: node
+    state: present
+  when: ansible_facts['os_family'] == "Darwin"
+
+- name: Install Docker on macOS
+  homebrew:
+    name:
+      - docker
+      - docker-compose
+    state: present
+  when: ansible_facts['os_family'] == "Darwin"
+
+- name: Clone Job Portal repository from GitHub
+  git:
+    repo: 'https://github.com/Dhruveel9594/job-portal.git'
+    dest: /Users/dhruveel/job-portal
+    version: main
+    force: yes
+
+- name: Build and run Docker containers
+  command: docker-compose up -d
+  args:
+    chdir: /Users/dhruveel/job-portal

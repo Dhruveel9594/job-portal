@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 293c9b9 (Remove version specification from docker-compose.yml)
 
 services:
   backend:

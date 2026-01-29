@@ -1,0 +1,4 @@
+- name: Deploy Job Portal
+  hosts: jobportal_servers
+  roles:
+    - jobportal
