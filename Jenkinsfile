@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+    }
+
     tools {
         nodejs 'node-18'
     }
@@ -17,9 +21,9 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                    node -v
-                    npm -v
-                    npm install
+                        node -v
+                        npm -v
+                        npm install
                     '''
                 }
             }
@@ -28,19 +32,19 @@ pipeline {
         stage('Docker Deploy') {
             steps {
                 sh '''
-                docker compose down || true
-                docker compose up -d --build
+                    docker compose down || true
+                    docker compose up -d --build
                 '''
             }
         }
     }
 
     post {
-        success {
-            echo 'Deployment Successful 🎉'
-        }
         failure {
-            echo 'Something went wrong ❌'
+            echo "Something went wrong ❌"
+        }
+        success {
+            echo "Deployment successful ✅"
         }
     }
 }
