@@ -1,47 +1,24 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'node-18'
-    }
-
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git 'https://github.com/Dhruveel9594/job-portal'
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Verify Files') {
             steps {
-                dir('frontend') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Lint & Test') {
-            steps {
-                dir('frontend') {
-                    sh 'npm test -- --watch=false'
-                }
-            }
-        }
-
-        stage('Build') {
-            steps {
-                dir('frontend') {
-                    sh 'npm run build'
-                }
+                sh 'ls -la'
             }
         }
 
         stage('Deploy') {
             steps {
-                dir('frontend') {
-                    sh 'echo Deploy frontend here'
-                    // e.g. upload to S3 / copy to server
-                }
+                sh '''
+                echo "Deploying static HTML files"
+                '''
             }
         }
     }
