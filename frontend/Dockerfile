@@ -1,11 +1,7 @@
-# Frontend Dockerfile
 FROM nginx:alpine
 
-# Copy the HTML file to nginx html directory
-COPY frontend.html /usr/share/nginx/html/index.html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy HTML files to nginx html directory
+COPY . /usr/share/nginx/html/
 
 # Expose port 80
 EXPOSE 80

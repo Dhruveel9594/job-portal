@@ -11,8 +11,8 @@ RUN npm install
 # Copy application files
 COPY . .
 
-# Expose port (adjust if your backend uses a different port)
+# Expose the port your backend uses
 EXPOSE 5000
 
 # Start the application
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
