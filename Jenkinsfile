@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        DOCKER_BUILDKIT = "1"
+        COMPOSE_DOCKER_CLI_BUILD = "1"
     }
 
     tools {
@@ -10,7 +12,6 @@ pipeline {
     }
 
     stages {
-
         stage('Verify Structure') {
             steps {
                 sh 'ls -la'
@@ -24,6 +25,7 @@ pipeline {
                         node -v
                         npm -v
                         npm install
+                        npm audit fix || true
                     '''
                 }
             }
@@ -31,10 +33,18 @@ pipeline {
 
         stage('Docker Deploy') {
             steps {
-                sh '''
-                    docker compose down || true
-                    docker compose up -d --build
-                '''
+                script {
+                    sh '''
+                        docker compose down || true
+                        docker compose up -d --build --remove-orphans
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh 'docker compose ps'
             }
         }
     }
@@ -42,6 +52,7 @@ pipeline {
     post {
         failure {
             echo "Something went wrong ❌"
+            sh 'docker compose logs || true'
         }
         success {
             echo "Deployment successful ✅"
