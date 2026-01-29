@@ -1,17 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        COMPOSE_PROJECT = "job_portal"
+    tools {
+        nodejs 'node18'
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
 
         stage('Verify Structure') {
             steps {
@@ -21,18 +15,19 @@ pipeline {
 
         stage('Backend Build') {
             steps {
-                sh '''
-                echo "Building backend..."
-                cd backend
-                npm install
-                '''
+                dir('backend') {
+                    sh '''
+                    node -v
+                    npm -v
+                    npm install
+                    '''
+                }
             }
         }
 
         stage('Docker Deploy') {
             steps {
                 sh '''
-                echo "Starting Docker Compose..."
                 docker-compose down || true
                 docker-compose up -d --build
                 '''
@@ -42,10 +37,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment Successful 🎉"
+            echo 'Deployment Successful 🎉'
         }
         failure {
-            echo "Something went wrong ❌"
+            echo 'Something went wrong ❌'
         }
     }
 }
