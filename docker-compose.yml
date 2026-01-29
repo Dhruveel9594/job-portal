@@ -1,4 +1,3 @@
-
 services:
   backend:
     build:
@@ -8,15 +7,20 @@ services:
       - "5001:5000"
     environment:
       - NODE_ENV=production
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    networks:
+      - talenthub-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3030:30"
+      - "3030:30"  # Changed to 8080 to avoid conflicts
     depends_on:
       - backend
+    networks:
+      - talenthub-network
+
+networks:
+  talenthub-network:
+    driver: bridge
