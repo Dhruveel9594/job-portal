@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> 293c9b9 (Remove version specification from docker-compose.yml)
 
 services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfil
     ports:
       - "5001:5000"
     environment:
