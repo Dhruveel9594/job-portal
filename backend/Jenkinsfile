@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'node-18'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir('backend') {
+                    sh 'npm install'
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                dir('backend') {
+                    sh 'npm test'
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('backend') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                dir('backend') {
+                    sh 'echo Deploy backend here'
+                    // docker build / kubectl apply / pm2 restart
+                }
+            }
+        }
+    }
+}
