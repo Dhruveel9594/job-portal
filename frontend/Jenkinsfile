@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Dhruveel9594/job-portal'
-            }
-        }
-
         stage('Verify Files') {
             steps {
                 sh 'ls -la'
@@ -17,7 +11,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                echo "Deploying static HTML files"
+                echo "Deploying static HTML project"
                 '''
             }
         }
