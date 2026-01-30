@@ -923,6 +923,7 @@
           }
         } catch (error) {
           setError('Network error. Please try again.');
+          console.log(error);
         } finally {
           setLoading(false);
         }
