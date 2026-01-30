@@ -1,13 +1,16 @@
 - name: Deploy Job Portal using Docker Compose
   hosts: jobportal_servers
-  become: no
+  become: yes
 
   tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
     - name: Install Docker
       apt:
         name: docker.io
         state: present
-        update_cache: yes
 
     - name: Install docker-compose plugin
       apt:
@@ -24,8 +27,6 @@
       file:
         path: /opt/job-portal
         state: directory
-        owner: root
-        group: root
         mode: '0755'
 
     - name: Sync project files
