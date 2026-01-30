@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
-        PATH = "/opt/homebrew/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-        ANSIBLE_HOST_KEY_CHECKING = "False"
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        COMPOSE_DOCKER_CLI_BUILD = "0"
+        DOCKER_BUILDKIT = "0"
     }
 
     tools {
@@ -12,15 +13,15 @@ pipeline {
 
     stages {
 
-        stage('Verify Workspace') {
+        stage('Checkout') {
             steps {
-                sh '''
-                    echo "=== Workspace ==="
-                    pwd
-                    ls -la
-                    echo "=== Ansible Folder ==="
-                    ls -la Ansible
-                '''
+                checkout scm
+            }
+        }
+
+        stage('Verify Project Structure') {
+            steps {
+                sh 'ls -la'
             }
         }
 
@@ -31,18 +32,17 @@ pipeline {
                         node -v
                         npm -v
                         npm install
-                        npm audit fix || true
                     '''
                 }
             }
         }
 
-        stage('Deploy with Ansible') {
+        stage('Docker Deploy') {
             steps {
                 sh '''
-                    /opt/homebrew/bin/ansible-playbook \
-                      -i Ansible/inventory.ini \
-                      Ansible/playbook.yml
+                    docker compose down || true
+                    docker system prune -f
+                    docker compose up -d --build
                 '''
             }
         }
@@ -56,10 +56,11 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment successful"
+            echo "✅ Job Portal deployed successfully!"
         }
         failure {
             echo "❌ Deployment failed"
+            sh 'docker compose logs || true'
         }
     }
 }
