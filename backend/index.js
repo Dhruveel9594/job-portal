@@ -331,7 +331,7 @@ users.forEach(user => {
   console.log(`   • ${user.email} / ${user.password} (${user.role})`);
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT,'0.0.0.0', () => {
   console.log(`\n✅ Backend running on http://localhost:${PORT}`);
   console.log('📋 Available endpoints:');
