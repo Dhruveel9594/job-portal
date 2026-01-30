@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "5001:5000"
+      - "5001:5000"  
     environment:
       - NODE_ENV=production
     networks:
@@ -15,7 +15,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3030:30"  # Changed to 8080 to avoid conflicts
+      - "3030:80"  
     depends_on:
       - backend
     networks:
