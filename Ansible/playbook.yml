@@ -1,4 +1,35 @@
-- name: Deploy Job Portal
-  hosts: jobportal_servers
-  roles:
-    - jobportal
+- name: Deploy Job Portal using Docker Compose
+  hosts: app
+  become: yes
+
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Create app directory
+      file:
+        path: /opt/job-portal
+        state: directory
+
+    - name: Copy project files
+      copy:
+        src: "{{ playbook_dir }}/../"
+        dest: /opt/job-portal
+        exclude:
+          - ansible
+          - .git
+          - node_modules
+
+    - name: Start containers
+      command: docker compose up -d --build
+      args:
+        chdir: /opt/job-portal
