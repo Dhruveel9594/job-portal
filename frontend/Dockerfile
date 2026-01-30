@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 # Copy HTML files to nginx html directory
-COPY frontend.html /usr/share/nginx/html/index.html
+COPY index.html /usr/share/nginx/html/index.html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
