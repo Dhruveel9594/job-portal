@@ -1,9 +1,12 @@
 pipeline {
     agent any
 
-    environment {
-        PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        environment {
+            PATH = "/opt/homebrew/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        }
+
     }
+
 
     tools {
         nodejs 'node-18'
