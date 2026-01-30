@@ -1,12 +1,13 @@
 pipeline {
     agent any
 
-        environment {
-            PATH = "/opt/homebrew/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-        }
+    environment {
+        // REQUIRED for macOS + Homebrew + Docker Desktop
+        PATH = "/opt/homebrew/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
 
+        DOCKER_BUILDKIT = "0"
+        COMPOSE_DOCKER_CLI_BUILD = "0"
     }
-
 
     tools {
         nodejs 'node-18'
@@ -14,9 +15,29 @@ pipeline {
 
     stages {
 
-        stage('Verify Structure') {
+        stage('Checkout') {
             steps {
-                sh 'ls -la'
+                checkout scm
+            }
+        }
+
+        stage('Verify Tools') {
+            steps {
+                sh '''
+                    echo "=== PATH ==="
+                    echo $PATH
+
+                    echo "=== Versions ==="
+                    node -v
+                    npm -v
+                    docker --version
+                    docker compose version
+
+                    echo "=== Ansible ==="
+                    which ansible || true
+                    which ansible-playbook || true
+                    ansible-playbook --version || true
+                '''
             }
         }
 
@@ -24,8 +45,6 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        node -v
-                        npm -v
                         npm install
                         npm audit fix || true
                     '''
@@ -36,26 +55,29 @@ pipeline {
         stage('Deploy with Ansible') {
             steps {
                 sh '''
-                  ansible-playbook \
-                  -i Ansible/inventory.ini \
-                  Ansible/playbooks/deploy.yml
+                    /opt/homebrew/bin/ansible-playbook \
+                      -i Ansible/inventory.ini \
+                      Ansible/playbooks/deploy.yml
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh 'docker ps'
+                sh '''
+                    docker compose ps
+                '''
             }
         }
     }
 
     post {
-        failure {
-            echo "Deployment failed ❌"
-        }
         success {
-            echo "Deployment successful via Ansible ✅"
+            echo "✅ Deployment successful"
+        }
+        failure {
+            echo "❌ Deployment failed"
+            sh 'docker compose logs || true'
         }
     }
 }
