@@ -1,18 +1,14 @@
 FROM node:18-alpine
 
+# Install build dependencies for bcrypt
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy application files
 COPY . .
 
-# Expose the port your backend uses
-EXPOSE 5000
-
-# Start the application
+EXPOSE 4000
 CMD ["node", "index.js"]
