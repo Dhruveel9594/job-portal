@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         PATH = "/usr/local/bin:/opt/homebrew/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-        COMPOSE_DOCKER_CLI_BUILD = "0"
-        DOCKER_BUILDKIT = "0"
+        ANSIBLE_FORCE_COLOR = "true"
+        DEPLOY_DIR = "${env.HOME}/job-portal-deploy"
     }
 
     tools {
@@ -13,7 +13,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
@@ -29,27 +29,32 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                        node -v
-                        npm -v
+                        echo "Node version: $(node -v)"
+                        echo "NPM version: $(npm -v)"
                         npm install
                     '''
                 }
             }
         }
 
-        stage('Docker Deploy') {
+        stage('Run Ansible Playbook') {
             steps {
-                sh '''
-                    docker compose down || true
-                    docker system prune -f
-                    docker compose up -d --build
-                '''
+                sh """
+                    echo "Running Ansible Playbook..."
+                    /opt/homebrew/bin/ansible-playbook \
+                        -i Ansible/inventory.ini \
+                        Ansible/playbook.yml \
+                        --connection=local
+                """
             }
         }
 
-        stage('Verify Deployment') {
+        stage('Verify Docker Deployment') {
             steps {
-                sh 'docker compose ps'
+                sh """
+                    echo "Checking Docker containers..."
+                    docker compose -f $DEPLOY_DIR/docker-compose.yml ps
+                """
             }
         }
     }
@@ -60,7 +65,7 @@ pipeline {
         }
         failure {
             echo "❌ Deployment failed"
-            sh 'docker compose logs || true'
+            sh "docker compose -f $DEPLOY_DIR/docker-compose.yml logs || true"
         }
     }
 }

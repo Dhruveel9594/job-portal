@@ -1,50 +1,40 @@
-- name: Deploy Job Portal using Docker Compose
-  hosts: jobportal_servers
-  become: yes
+---
+- name: Deploy Job Portal using Docker Compose on Mac
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  become: no
 
   tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-
-    - name: Install required packages
-      apt:
-        name:
-          - docker.io
-          - docker-compose-plugin
+    - name: Ensure Docker is installed via Homebrew
+      homebrew:
+        name: docker
         state: present
 
-    - name: Start and enable Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
+    - name: Ensure Docker Compose is installed via Homebrew
+      homebrew:
+        name: docker-compose
+        state: present
 
-    - name: Add ubuntu user to docker group
-      user:
-        name: ubuntu
-        groups: docker
-        append: yes
-
-    - name: Create app directory
+    - name: Create app directory in home
       file:
-        path: /opt/job-portal
+        path: "{{ ansible_env.HOME }}/job-portal-deploy"
         state: directory
-        owner: ubuntu
-        group: ubuntu
+        owner: "{{ ansible_env.USER }}"
         mode: '0755'
 
-    - name: Sync project files
+    - name: Sync project files to deploy directory
       synchronize:
         src: "{{ playbook_dir }}/../"
-        dest: /opt/job-portal
+        dest: "{{ ansible_env.HOME }}/job-portal-deploy"
         delete: yes
         rsync_opts:
           - "--exclude=.git"
           - "--exclude=node_modules"
           - "--exclude=Ansible"
 
-    - name: Deploy containers
-      command: docker compose up -d --build
-      args:
-        chdir: /opt/job-portal
+    - name: Deploy Docker containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_env.HOME }}/job-portal-deploy"
+        build: always
+        state: present
