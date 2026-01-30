@@ -2,57 +2,52 @@ pipeline {
     agent any
 
     environment {
-        ANSIBLE_BIN = "/opt/homebrew/bin/ansible-playbook"
-        PLAYBOOK    = "Ansible/playbook.yml"
-        INVENTORY   = "Ansible/inventory.ini"
+        PATH = "/opt/homebrew/bin:/usr/local/bin:$PATH"
     }
 
     stages {
-        stage('Verify Workspace') {
+        stage('Verify Files') {
             steps {
-                echo "Listing all files in workspace"
+                echo "Listing project files..."
                 sh 'ls -la'
             }
         }
 
-        stage('Backend Build') {
+        stage('Ensure Homebrew & Docker') {
             steps {
-                dir('backend') {
-                    sh '''
-                    echo "Building backend..."
-                    node -v
-                    npm -v
-                    npm install
-                    npm audit fix || true
-                    '''
-                }
+                echo "Checking Homebrew, Docker & Docker Compose"
+                sh '''
+                    which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+                    brew install docker || true
+                    brew install docker-compose || true
+                '''
             }
         }
 
-        stage('Deploy with Ansible on Mac') {
+        stage('Run Ansible Playbook') {
             steps {
-                echo "Running Ansible playbook locally on macOS"
+                echo "Deploying Job Portal using Ansible"
                 sh '''
-                $ANSIBLE_BIN -i $INVENTORY $PLAYBOOK --connection=local
+                    /opt/homebrew/bin/ansible-playbook -i Ansible/inventory.ini Ansible/playbook.yml --connection=local
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                echo "Checking Docker containers"
-                sh 'docker compose ps || true'
+                echo "Verifying Docker containers"
+                sh 'docker compose -f /opt/job-portal/docker-compose.yml ps'
             }
         }
     }
 
     post {
-        success {
-            echo "Deployment completed successfully ✅"
-        }
         failure {
             echo "Deployment failed ❌"
-            sh 'docker compose logs || true'
+            sh 'docker compose -f /opt/job-portal/docker-compose.yml logs || true'
+        }
+        success {
+            echo "Deployment successful ✅"
         }
     }
 }
