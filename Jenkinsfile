@@ -2,11 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // REQUIRED for macOS + Homebrew + Docker Desktop
         PATH = "/opt/homebrew/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-
-        DOCKER_BUILDKIT = "0"
-        COMPOSE_DOCKER_CLI_BUILD = "0"
+        ANSIBLE_HOST_KEY_CHECKING = "False"
     }
 
     tools {
@@ -15,28 +12,14 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Verify Tools') {
+        stage('Verify Workspace') {
             steps {
                 sh '''
-                    echo "=== PATH ==="
-                    echo $PATH
-
-                    echo "=== Versions ==="
-                    node -v
-                    npm -v
-                    docker --version
-                    docker compose version
-
-                    echo "=== Ansible ==="
-                    which ansible || true
-                    which ansible-playbook || true
-                    ansible-playbook --version || true
+                    echo "=== Workspace ==="
+                    pwd
+                    ls -la
+                    echo "=== Ansible Folder ==="
+                    ls -la Ansible
                 '''
             }
         }
@@ -45,6 +28,8 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
+                        node -v
+                        npm -v
                         npm install
                         npm audit fix || true
                     '''
@@ -57,16 +42,14 @@ pipeline {
                 sh '''
                     /opt/homebrew/bin/ansible-playbook \
                       -i Ansible/inventory.ini \
-                      Ansible/playbooks/deploy.yml
+                      Ansible/playbook.yml
                 '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh '''
-                    docker compose ps
-                '''
+                sh 'docker compose ps'
             }
         }
     }
@@ -77,7 +60,6 @@ pipeline {
         }
         failure {
             echo "❌ Deployment failed"
-            sh 'docker compose logs || true'
         }
     }
 }
