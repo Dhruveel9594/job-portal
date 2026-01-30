@@ -1,6 +1,6 @@
 - name: Deploy Job Portal using Docker Compose
   hosts: jobportal_servers
-  become: yes
+  become: no
 
   tasks:
     - name: Install Docker
