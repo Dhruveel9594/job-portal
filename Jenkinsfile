@@ -3,8 +3,6 @@ pipeline {
 
     environment {
         PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
-        DOCKER_BUILDKIT = "0"  // Disable BuildKit
-        COMPOSE_DOCKER_CLI_BUILD = "0"
     }
 
     tools {
@@ -12,6 +10,7 @@ pipeline {
     }
 
     stages {
+
         stage('Verify Structure') {
             steps {
                 sh 'ls -la'
@@ -31,32 +30,29 @@ pipeline {
             }
         }
 
-        stage('Docker Deploy') {
+        stage('Deploy with Ansible') {
             steps {
-                script {
-                    sh '''
-                        docker compose down || true
-                        docker system prune -f
-                        docker compose up -d --build --remove-orphans
-                    '''
-                }
+                sh '''
+                  ansible-playbook \
+                  -i Ansible/inventory.ini \
+                  Ansible/playbooks/deploy.yml
+                '''
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh 'docker compose ps'
+                sh 'docker ps'
             }
         }
     }
 
     post {
         failure {
-            echo "Something went wrong ❌"
-            sh 'docker compose logs || true'
+            echo "Deployment failed ❌"
         }
         success {
-            echo "Deployment successful ✅"
+            echo "Deployment successful via Ansible ✅"
         }
     }
 }

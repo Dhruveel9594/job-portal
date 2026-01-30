@@ -9,27 +9,37 @@
         state: present
         update_cache: yes
 
-    - name: Install Docker Compose
-      get_url:
-        url: https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64
-        dest: /usr/local/bin/docker-compose
-        mode: '0755'
+    - name: Install docker-compose plugin
+      apt:
+        name: docker-compose-plugin
+        state: present
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Create app directory
       file:
         path: /opt/job-portal
         state: directory
+        owner: root
+        group: root
+        mode: '0755'
 
-    - name: Copy project files
-      copy:
+    - name: Sync project files
+      synchronize:
         src: "{{ playbook_dir }}/../"
         dest: /opt/job-portal
-        exclude:
-          - ansible
-          - .git
-          - node_modules
+        delete: yes
+        rsync_opts:
+          - "--exclude=.git"
+          - "--exclude=node_modules"
+          - "--exclude=Ansible"
 
-    - name: Start containers
-      command: docker compose up -d --build
-      args:
-        chdir: /opt/job-portal
+    - name: Deploy containers
+      community.docker.docker_compose_v2:
+        project_src: /opt/job-portal
+        build: true
+        state: present
