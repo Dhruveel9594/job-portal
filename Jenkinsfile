@@ -37,6 +37,24 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            environment {
+                SONAR_SCANNER = tool 'SonarScanner'
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        $SONAR_SCANNER/bin/sonar-scanner \
+                        -Dsonar.projectKey=job-portal \
+                        -Dsonar.projectName=Job-Portal \
+                        -Dsonar.sources=backend,frontend \
+                        -Dsonar.exclusions=**/node_modules/**,**/dist/** \
+                        -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
+                    """
+                }
+            }
+        }
+
         stage('Run Ansible Playbook') {
             steps {
                 sh """
