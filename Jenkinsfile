@@ -38,52 +38,49 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                SONAR_SCANNER = tool 'SonarScanner'
-            }
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh """
-                        $SONAR_SCANNER/bin/sonar-scanner \
+                    sh '''
+                    sonar-scanner \
                         -Dsonar.projectKey=job-portal \
                         -Dsonar.projectName=Job-Portal \
                         -Dsonar.sources=backend,frontend \
                         -Dsonar.exclusions=**/node_modules/**,**/dist/** \
                         -Dsonar.javascript.lcov.reportPaths=backend/coverage/lcov.info
-                    """
+                    '''
                 }
             }
         }
 
         stage('Run Ansible Playbook') {
             steps {
-                sh """
+                sh '''
                     echo "Running Ansible Playbook..."
                     /opt/homebrew/bin/ansible-playbook \
                         -i Ansible/inventory.ini \
                         Ansible/playbook.yml \
                         --connection=local
-                """
+                '''
             }
         }
 
         stage('Verify Docker Deployment') {
             steps {
-                sh """
+                sh '''
                     echo "Checking Docker containers..."
                     docker compose -f $DEPLOY_DIR/docker-compose.yml ps
-                """
+                '''
             }
         }
     }
 
     post {
         success {
-            echo "✅ Job Portal deployed successfully!"
+            echo "✅ Job Portal deployed successfully with SonarQube analysis!"
         }
         failure {
-            echo "❌ Deployment failed"
-            sh "docker compose -f $DEPLOY_DIR/docker-compose.yml logs || true"
+            echo "❌ Pipeline failed"
+            sh 'docker compose -f $DEPLOY_DIR/docker-compose.yml logs || true'
         }
     }
 }
